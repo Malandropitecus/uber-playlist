@@ -4,6 +4,7 @@ from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 import streamlit as st
 from datetime  import datetime
 import sqlite3
+import requests
 
 #Conexión con base de datos
 conn = sqlite3.connect("playlist.db")
@@ -25,6 +26,8 @@ conn.commit()
 SPOTIPY_CLIENT_ID = st.secrets.get("SPOTIPY_CLIENT_ID") or os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = st.secrets.get("SPOTIPY_CLIENT_SECRET") or os.getenv("SPOTIPY_CLIENT_SECRET")
 SPOTIPY_REDIRECT_URI = st.secrets.get("SPOTIPY_REDIRECT_URI") or os.getenv("SPOTIPY_REDIRECT_URI")
+SPOTIPY_REFRESH_TOKEN = st.secrets.get("SPOTIPY_REFRESH_TOKEN") or os.getenv("SPOTIPY_REFRESH_TOKEN")
+
 
 #sp es el objeto que permite la interacion con la API de Spotify
 #sp + un metodo es una peticion a la API de Spotify
@@ -33,12 +36,16 @@ sp_search = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_secret=SPOTIPY_CLIENT_SECRET
 ))
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=SPOTIPY_CLIENT_ID,
-    client_secret=SPOTIPY_CLIENT_SECRET,
-    redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope="playlist-modify-public playlist-modify-private"
-))
+def get_access_token():
+    response = requests.post("https://accounts.spotify.com/api/token", data={
+        "grant_type": "refresh_token",
+        "refresh_token": SPOTIPY_REFRESH_TOKEN,
+        "client_id": SPOTIPY_CLIENT_ID,
+        "client_secret": SPOTIPY_CLIENT_SECRET
+    })
+    return response.json()["access_token"]
+
+sp = spotipy.Spotify(auth=get_access_token())
 
 #Identificador que se mostró al iniciar la conexión con spotify desde el inicio
 SPOTIFY_USER_ID = "eds69eac9ezdoh2fk34swimo7"
