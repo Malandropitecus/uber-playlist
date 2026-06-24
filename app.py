@@ -1,6 +1,6 @@
 import os
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 import streamlit as st
 from datetime  import datetime
 import sqlite3
@@ -28,11 +28,16 @@ SPOTIPY_REDIRECT_URI = st.secrets.get("SPOTIPY_REDIRECT_URI") or os.getenv("SPOT
 
 #sp es el objeto que permite la interacion con la API de Spotify
 #sp + un metodo es una peticion a la API de Spotify
+sp_search = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+    client_id=SPOTIPY_CLIENT_ID,
+    client_secret=SPOTIPY_CLIENT_SECRET
+))
+
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=SPOTIPY_CLIENT_ID,
     client_secret=SPOTIPY_CLIENT_SECRET,
     redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope="playlist-modify-public playlist-modify-private ugc-image-upload"
+    scope="playlist-modify-public playlist-modify-private"
 ))
 
 #Identificador que se mostró al iniciar la conexión con spotify desde el inicio
