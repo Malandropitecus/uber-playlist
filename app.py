@@ -6,10 +6,6 @@ from datetime  import datetime
 import requests
 from supabase import create_client
 import pytz
-
-zona = pytz.timezone("America/Chihuahua")
-ahora = datetime.now(zona)
-
 #Conexión con Supabase - Eliminamos Sqlite3 para mod. bd local en Postgre Cloud
 
 
@@ -80,7 +76,8 @@ if "resultados" in st.session_state:
         with col2:
             if st.button("➕ Agregar", key=f"btn_{i}"):
                 #Esto para analizar tendencias por mes, analizar datos por año y que le gusta a la gente dada cierta hora
-                ahora = datetime.now()
+                zona = pytz.timezone("America/Chihuahua")
+                ahora = datetime.now(zona)
                 fecha = ahora.strftime("%d/%m/%Y")
                 hora = ahora.strftime("%H:%M")
                 dia = ahora.strftime("%A")
