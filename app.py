@@ -3,30 +3,24 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 import streamlit as st
 from datetime  import datetime
-import sqlite3
 import requests
+from supabase import create_client
 
-#Conexión con base de datos
-conn = sqlite3.connect("playlist.db")
-c = conn.cursor()
-c.execute('''
-    CREATE TABLE IF NOT EXISTS canciones (
-        "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
-        "cancion"	TEXT,
-        "artista"	TEXT,
-        "edad"	INTEGER,
-        "fecha"	TEXT,
-        "hora"	TEXT,
-        "dia"	TEXT
-)
-''')
+#Conexión con Supabase - Eliminamos Sqlite3 para mod. bd local en Postgre Cloud
 
-conn.commit()
 
+#Credenciales de Spotipy
 SPOTIPY_CLIENT_ID = st.secrets.get("SPOTIPY_CLIENT_ID") or os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = st.secrets.get("SPOTIPY_CLIENT_SECRET") or os.getenv("SPOTIPY_CLIENT_SECRET")
 SPOTIPY_REDIRECT_URI = st.secrets.get("SPOTIPY_REDIRECT_URI") or os.getenv("SPOTIPY_REDIRECT_URI")
 SPOTIPY_REFRESH_TOKEN = st.secrets.get("SPOTIPY_REFRESH_TOKEN") or os.getenv("SPOTIPY_REFRESH_TOKEN")
+
+#Credenciales de Supabase - Postgree DB
+SUPABASE_URL = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
+
+supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 
 #sp es el objeto que permite la interacion con la API de Spotify
@@ -86,13 +80,15 @@ if "resultados" in st.session_state:
                 fecha = ahora.strftime("%d/%m/%Y")
                 hora = ahora.strftime("%H:%M")
                 dia = ahora.strftime("%A")
-                # Insertamos los datos en la tabla "canciones"
-                c.execute('''
-                    INSERT INTO canciones (cancion, artista, edad, fecha, hora, dia)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (track['name'], track['artists'][0]['name'], edad, fecha, hora, dia))
-                #Confirmamos la inserción en la base de datos
-                conn.commit()
+                # Insertamos los datos en la tabla "canciones", cambiamos por método supabase
+                supabase_client.table("canciones").insert({ #Insertamos los datos en la tabla "canciones"
+                    "cancion": track['name'],
+                    "artista": track['artists'][0]['name'],
+                    "edad": edad,
+                    "fecha": fecha,
+                    "hora": hora,
+                    "dia": dia
+                }).execute() #Ejecuta la operación
                 #Con esta linea agregamos la canción a la playlist
                 sp.playlist_add_items(PLAYLIST_ID, [track['uri']])
                 #Aquí separamos la columna para que no se amontone mucho lo visual
