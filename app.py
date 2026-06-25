@@ -80,13 +80,15 @@ if "resultados" in st.session_state:
                 fecha = ahora.strftime("%d/%m/%Y")
                 hora = ahora.strftime("%H:%M")
                 dia = ahora.strftime("%A")
-                # Insertamos los datos en la tabla "canciones"
-                c.execute('''
-                    INSERT INTO canciones (cancion, artista, edad, fecha, hora, dia)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (track['name'], track['artists'][0]['name'], edad, fecha, hora, dia))
-                #Confirmamos la inserción en la base de datos
-                conn.commit()
+                # Insertamos los datos en la tabla "canciones", cambiamos por método supabase
+                supabase_client.table("canciones").insert({ #Insertamos los datos en la tabla "canciones"
+                    "cancion": track['name'],
+                    "artista": track['artists'][0]['name'],
+                    "edad": edad,
+                    "fecha": fecha,
+                    "hora": hora,
+                    "dia": dia
+                }).execute() #Ejecuta la operación
                 #Con esta linea agregamos la canción a la playlist
                 sp.playlist_add_items(PLAYLIST_ID, [track['uri']])
                 #Aquí separamos la columna para que no se amontone mucho lo visual
