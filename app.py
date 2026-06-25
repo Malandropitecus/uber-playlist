@@ -3,30 +3,24 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 import streamlit as st
 from datetime  import datetime
-import sqlite3
 import requests
+from supabase import create_client
 
-#Conexión con base de datos
-conn = sqlite3.connect("playlist.db")
-c = conn.cursor()
-c.execute('''
-    CREATE TABLE IF NOT EXISTS canciones (
-        "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
-        "cancion"	TEXT,
-        "artista"	TEXT,
-        "edad"	INTEGER,
-        "fecha"	TEXT,
-        "hora"	TEXT,
-        "dia"	TEXT
-)
-''')
+#Conexión con Supabase - Eliminamos Sqlite3 para mod. bd local en Postgre Cloud
 
-conn.commit()
 
+#Credenciales de Spotipy
 SPOTIPY_CLIENT_ID = st.secrets.get("SPOTIPY_CLIENT_ID") or os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = st.secrets.get("SPOTIPY_CLIENT_SECRET") or os.getenv("SPOTIPY_CLIENT_SECRET")
 SPOTIPY_REDIRECT_URI = st.secrets.get("SPOTIPY_REDIRECT_URI") or os.getenv("SPOTIPY_REDIRECT_URI")
 SPOTIPY_REFRESH_TOKEN = st.secrets.get("SPOTIPY_REFRESH_TOKEN") or os.getenv("SPOTIPY_REFRESH_TOKEN")
+
+#Credenciales de Supabase - Postgree DB
+SUPABASE_URL = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
+
+supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 
 #sp es el objeto que permite la interacion con la API de Spotify
