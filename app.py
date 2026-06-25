@@ -5,6 +5,10 @@ import streamlit as st
 from datetime  import datetime
 import requests
 from supabase import create_client
+import pytz
+
+zona = pytz.timezone("America/Chihuahua")
+ahora = datetime.now(zona)
 
 #Conexión con Supabase - Eliminamos Sqlite3 para mod. bd local en Postgre Cloud
 
